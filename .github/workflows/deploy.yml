@@ -1,0 +1,43 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # 只在 main 分支推送时触发
+    paths:
+      - '**/*.md'  # 仅在 Markdown 文件变化时触发（你可以根据需要修改）
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # 使用最新的 Ubuntu 环境
+
+    steps:
+    # 步骤 1: 检出代码
+    - name: Checkout code
+      uses: actions/checkout@v2
+    
+    # 步骤 2: 设置 Ruby（Jekyll 依赖 Ruby）
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7 # 你可以使用 Jekyll 兼容的任何 Ruby 版本
+
+    # 步骤 3: 安装 Jekyll 和依赖
+    - name: Install dependencies
+      run: |
+        gem install jekyll bundler
+        bundle install
+
+    # 步骤 4: 构建 Jekyll 网站
+    - name: Build Jekyll site
+      run: |
+        bundle exec jekyll build
+    
+    # 步骤 5: 将生成的静态文件推送到 GitHub Pages
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages  # 将构建后的内容推送到 gh-pages 分支（确保这是你的 GitHub Pages 部署分支）
+        folder: _site     # Jekyll 默认的输出目录
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 自动提供 GitHub Token 用于权限验证
